@@ -3,8 +3,9 @@
 bounding box. This program is written for the final project of ELEN 4830 Digital
 Image Processing (Spring 2017).
 
-Author: Chen, Yan-Song, Lin, Hung-Shih
-Date  : May 14, 2017
+## Contributors
+    * Chen, Yan-Song
+    * Lin, Hung-Shih
 
 ## Arguments
 ### Required arguments:
