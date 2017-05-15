@@ -1,16 +1,18 @@
 ## Introduction
-"tracker.py" is a program that tracks the object given the first location of
-bounding box. This program is written for the final project of ELEN 4830 Digital
-Image Processing (Spring 2017).
+This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017). Our object tracking is based on computing the similarity between target image (average of previous bounding boxes) and the sub-images (sampled randoming around previous object location).
 
 ## Contributors
-* Chen, Yan-Song  Columbia University
-* Lin, Hung-Shih  Columbia University
+* Hung-Shih Lin,  Columbia University
+* Yan-Song Chen,  Columbia University
 
 ## Contents
-1. tracker.py: the main program that interects with the Siamese network model and video file.
+* tracker.py
 
-2. siamese_network.py: construct the architecture of Siamese network.
+The main program that interects with the Siamese network model and video file.
+
+* siamese_network.py
+
+Constructs the architecture of Siamese network.
 
 ## Running the program
 1. "tracker.py" is the only source file that need to be execute. Before running
