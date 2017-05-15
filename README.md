@@ -1,3 +1,4 @@
+## Introduction
 "tracker.py" is a program that tracks the object given the first location of
 bounding box. This program is written for the final project of ELEN 4830 Digital
 Image Processing (Spring 2017).
@@ -5,7 +6,7 @@ Image Processing (Spring 2017).
 Author: Chen, Yan-Song, Lin, Hung-Shih
 Date  : May 14, 2017
 
----------------------------RUN PROGRAM ON COMMAND LINE--------------------------
+## Arguments
 Required arguments:
     -p: video source file. Note that the frame images must be named as 
         "frame#.jpg", where the number must begin from 0 and should be 
@@ -34,3 +35,8 @@ Optional arguments:
         program will automatically create one. The output images will be
         "#.jpg".
         Default path is "tracker_output"
+
+## Code Example
+The following command specify the video path and the upper left cornor of bounding 
+box to be (30, 30)
+python tracker.py -p some_filepath -x 30 -y 30 
