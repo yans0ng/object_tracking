@@ -7,7 +7,7 @@ Author: Chen, Yan-Song, Lin, Hung-Shih
 Date  : May 14, 2017
 
 ## Arguments
-Required arguments:
+### Required arguments:
     -p: video source file. Note that the frame images must be named as 
         "frame#.jpg", where the number must begin from 0 and should be 
         consecutive. 
@@ -21,7 +21,7 @@ Required arguments:
         initial bounding box.
 
 
-Optional arguments:
+### Optional arguments:
     -s: the size (in pixels) of bounding box. 
         Default value is 64.
 
@@ -39,4 +39,5 @@ Optional arguments:
 ## Code Example
 The following command specify the video path and the upper left cornor of bounding 
 box to be (30, 30)
+
 python tracker.py -p some_filepath -x 30 -y 30 
