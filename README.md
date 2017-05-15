@@ -4,11 +4,13 @@ bounding box. This program is written for the final project of ELEN 4830 Digital
 Image Processing (Spring 2017).
 
 ## Contributors
-    * Chen, Yan-Song
-    * Lin, Hung-Shih
+    * Chen, Yan-Song  Columbia University
+    * Lin, Hung-Shih  Columbia University
 
-## Arguments
-### Required arguments:
+## Contents
+### tracker.py: 
+    the main program that interects with the Siamese network model and video file.
+#### Required arguments:
     -p: video source file. Note that the frame images must be named as 
         "frame#.jpg", where the number must begin from 0 and should be 
         consecutive. 
@@ -22,7 +24,7 @@ Image Processing (Spring 2017).
         initial bounding box.
 
 
-### Optional arguments:
+#### Optional arguments:
     -s: the size (in pixels) of bounding box. 
         Default value is 64.
 
