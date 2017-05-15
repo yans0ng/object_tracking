@@ -40,4 +40,4 @@ Date  : May 14, 2017
 The following command specify the video path and the upper left cornor of bounding 
 box to be (30, 30)
 
-python tracker.py -p some_filepath -x 30 -y 30 
+    $python tracker.py -p some_filepath -x 30 -y 30 
