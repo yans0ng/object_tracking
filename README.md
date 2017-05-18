@@ -1,18 +1,69 @@
 ## Introduction
-This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017). Our object tracking is based on computing the similarity between target image (average of previous bounding boxes) and the sub-images (sampled randoming around previous object location).
+This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
+
+Model Details:
+The algorithm is based on Siamese model with several highway nets. Model is first trained offline with
+static images to learn features of different classes. In the tracking phase, assuming known initial object location, the tracking algorithm samples randomly from current frame centered on the objection location in the previous frame. Similarity for each pair is computed, and the patch that has maximum similarity is choosen as the object location at the current frame. Averaging target frames is used to reduce error-accumulation problem. 
 
 ## Contributors
 * Hung-Shih Lin,  Columbia University
 * Yan-Song Chen,  Columbia University
 
 ## Contents
-* tracker.py
 
-The main program that interects with the Siamese network model and video file.
+* main.py
+
+The program used to call functions on utils. This program is for training Siamese model.
 
 * siamese_network.py
 
 Constructs the architecture of Siamese network.
+
+* tracker.py
+
+The main program that interects with the Siamese network model and video file.
+
+* utils.py
+
+Contains functions used for training and prediction.
+
+* resize.py
+
+Resize images
+
+## Training the model
+Execute main.py with following arguments:
+
+#### Required arguments: 
+    -data: training data or data used for prediction
+
+    -mode: 0 fo prediction. otherwise training
+
+#### Optional arguments:
+    -ep: epochs
+    
+    -bs: batch size
+    
+    -lr: learning rate
+    
+    -output: output function. e for euclidean distance, c for cosine similarity
+    
+    -wpath: pretrained weight path
+    
+    -wspath: path for saving trained weight
+    
+    -lspath: path for saving log file
+    
+    -pspath: path for saving prediciton
+    
+    -split_ratio: ratio of training data used for validation
+    
+    -loss: loss function. l for logistic, c for contrastive
+    
+    -val_data: validation data. if given, overwrite split ratio
+
+### Code Example:
+    $python main.py -mode 1 -data <path for training data> -ep 5 -bs 2 -lr 0.001 -output l -loss c -split_ratio 0.2
 
 ## Running the program
 1. "tracker.py" is the only source file that need to be execute. Before running
@@ -35,6 +86,8 @@ named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and s
     -y: initial object location. The y coordinate of left and upper of the
         initial bounding box.
 
+    -w: pretrained weight path
+
 
 #### Optional arguments:
     -s: the size (in pixels) of bounding box. 
@@ -50,6 +103,8 @@ named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and s
         program will automatically create one. The output images will be
         "#.jpg".
         Default path is "tracker_output"
+
+    -e: model's output function. e for euclidean distance. c for cosine similarity
 
 #### Code Example
 The following command specify the video path and the upper left cornor of bounding 
