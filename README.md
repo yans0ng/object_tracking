@@ -1,7 +1,7 @@
 ## Introduction
 This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
 
-Model Details:
+## Model Details:
 The algorithm is based on Siamese model with several highway nets. Model is first trained offline with
 static images to learn features of different classes. In the tracking phase, assuming known initial object location, the tracking algorithm samples randomly from current frame centered on the objection location in the previous frame. Similarity for each pair is computed, and the patch that has maximum similarity is choosen as the object location at the current frame. Averaging target frames is used to reduce error-accumulation problem. 
 
