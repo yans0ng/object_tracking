@@ -207,14 +207,14 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-p", "--source_file", required=True, help="Video source")
-    ap.add_argument("-w", "--weight_path", required = True, helper = 'pretrained weight')
+    ap.add_argument("-w", "--weight_path", required = True, helper = 'pretrained weight')    
     ap.add_argument("-x", "--init_x", required=True, help="Initial Object Location(x)",type=int)
     ap.add_argument("-y", "--init_y", required=True, help="Initial Object Location(y)",type=int)
     ap.add_argument("-s", "--size", required=False, default=64, help="Object Size", type=int)
     ap.add_argument("-n", "--sample_num", required=False, default=50, help="Number of Samples",type=int)
     ap.add_argument("-v", "--variance", required=False, default=5.,help="Sampling Variance",type=float)
     ap.add_argument("-o", "--output_file", required=False,default='tracker_output', help="Output file")
-    ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
+     ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
     args = vars(ap.parse_args())
 
     # instantiate tracker
@@ -225,7 +225,8 @@ if __name__ == "__main__":
         count += 1
         candidate_patches = t.get_next_patches()
 
-        scores = calculateScores(t.avg_target(), candidate_patches, args["weight_path"], args["output_func"])
+        scores = calculateScores(t.avg_target(), candidate_patche, args["weight_path"], args["output_func"])
+        # test with arbitary score list)
         # test with arbitary score list
         #scores = [1, 2, 3, 4, 5]
 

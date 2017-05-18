@@ -6,7 +6,7 @@ from utils import *
 parser = argparse.ArgumentParser()
 parser.add_argument('-data', required = True, help = 'training data or data to predicted')
 parser.add_argument('-mode', required = True, help = '0 for prediction, otherwise training with data', type = int)
-parser.add_argument('-output', help ='Output function, e for euclidean distance, c for cosine similarity', default = 'e')
+parser.add_argument('-output', help = 'Output function, e for euclidean distance, c for cosine similarity', default = 'e')
 parser.add_argument('-wpath', '--weight_path', help = 'pretrained weight', default = None)
 parser.add_argument('-split_ratio', '--validation_split_ratio', help = 'ratio of validation data used during training'default = 0.2, type = float)
 parser.add_argument('-ep', '--epoch', help = 'number of epochs', default = 5, type = int)
