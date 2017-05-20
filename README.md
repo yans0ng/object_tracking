@@ -41,17 +41,15 @@ named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and s
 
 ## Preprocessing training data
 The face of human beings has sophisticated details with which we distinguish one from another. Hence, we pick the face to train out 
-Siamese network model. In this project, the face training data was downloaded from http://vis-www.cs.umass.edu/lfw/
-
-Individuals who has only 1 photo were used to generate negative pairs; individuals who has 2 or more photos are used to generate
-positive pairs. In order to generate training data:
+Siamese network model. In this project, the face training data was downloaded from http://vis-www.cs.umass.edu/lfw/ .Individuals who 
+has only 1 photo were used to generate negative pairs; individuals who has 2 or more photos are used to generatepositive pairs. 
+In order to generate training data:
 
 1. Download data from http://vis-www.cs.umass.edu/lfw/
-
 2. Decompress and place the "lfw" file to the same directory of face_data_prep.py
-
 3. Execute face_data_prep.py
 
+#### Code example:
     $ python face_data_prep.py
 
 ## Training the model
