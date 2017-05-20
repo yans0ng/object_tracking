@@ -31,14 +31,6 @@ Contains functions used for training and prediction.
 
 Resize images
 
-## Running the program
-1. "tracker.py" is the only source file that need to be execute. Before running
-this program, make sure "siamese.py" is placed in the same directory.
-2. The images of frames of video must be extracted beforehand. They should be
-named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and so on.
-3. Place the frame images in a file, which is also in the directory of source files.
-4. Up till now, the directory should have at least "tracker.py", "siamese.py".Parameters can be assigned via the following arguments.
-
 ## Preprocessing training data
 The face of human beings has sophisticated details with which we distinguish one from another. Hence, we pick the face to train out 
 Siamese network model. In this project, the face training data was downloaded from http://vis-www.cs.umass.edu/lfw/ .Individuals who 
@@ -83,8 +75,17 @@ Execute main.py with following arguments:
     
     -val_data: validation data. if given, overwrite split ratio
 
-### Code Example:
+#### Code Example:
     $python main.py -mode 1 -data <path for training data> -ep 5 -bs 2 -lr 0.001 -output l -loss c -split_ratio 0.2
+
+## Capturing initial object location
+We focused on the tracking problem. Therefore, the program is semi-automated, which means the user have to assign the
+first location of bounding box of object.
+
+
+
+## Object tracking
+After getting the initial position of the object and the pretrained model, execute tracker.py
 
 #### Required arguments:
     -p: video source file. Note that the frame images must be named as 
