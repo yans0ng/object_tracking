@@ -1,5 +1,5 @@
 ## Introduction
-This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
+This project originated from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
 
 ## Model Details:
 The algorithm is based on Siamese model with several highway nets. Model is first trained offline with
@@ -30,6 +30,29 @@ Contains functions used for training and prediction.
 * resize.py
 
 Resize images
+
+## Running the program
+1. "tracker.py" is the only source file that need to be execute. Before running
+this program, make sure "siamese.py" is placed in the same directory.
+2. The images of frames of video must be extracted beforehand. They should be
+named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and so on.
+3. Place the frame images in a file, which is also in the directory of source files.
+4. Up till now, the directory should have at least "tracker.py", "siamese.py".Parameters can be assigned via the following arguments.
+
+## Preprocessing training data
+The face of human beings has sophisticated details with which we distinguish one from another. Hence, we pick the face to train out 
+Siamese network model. In this project, the face training data was downloaded from http://vis-www.cs.umass.edu/lfw/
+
+Individuals who has only 1 photo were used to generate negative pairs; individuals who has 2 or more photos are used to generate
+positive pairs. In order to generate training data:
+
+1. Download data from http://vis-www.cs.umass.edu/lfw/
+
+2. Decompress and place the "lfw" file to the same directory of face_data_prep.py
+
+3. Execute face_data_prep.py
+
+    $ python face_data_prep.py
 
 ## Training the model
 Execute main.py with following arguments:
@@ -64,14 +87,6 @@ Execute main.py with following arguments:
 
 ### Code Example:
     $python main.py -mode 1 -data <path for training data> -ep 5 -bs 2 -lr 0.001 -output l -loss c -split_ratio 0.2
-
-## Running the program
-1. "tracker.py" is the only source file that need to be execute. Before running
-this program, make sure "siamese.py" is placed in the same directory.
-2. The images of frames of video must be extracted beforehand. They should be
-named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and so on.
-3. Place the frame images in a file, which is also in the directory of source files.
-4. Up till now, the directory should have at least "tracker.py", "siamese.py".Parameters can be assigned via the following arguments.
 
 #### Required arguments:
     -p: video source file. Note that the frame images must be named as 
