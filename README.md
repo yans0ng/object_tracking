@@ -1,5 +1,5 @@
 ## Introduction
-This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
+This project originated from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017).
 
 ## Model Details:
 The algorithm is based on Siamese model with several highway nets. Model is first trained offline with
@@ -11,25 +11,32 @@ static images to learn features of different classes. In the tracking phase, ass
 
 ## Contents
 
-* main.py
+* main.py: the program used to call functions on utils. This program is for training Siamese model.
 
-The program used to call functions on utils. This program is for training Siamese model.
+* siamese_network.py: constructs the architecture of Siamese network.
 
-* siamese_network.py
+* tracker.py: takes in image frames and mark object bounding boxes by prediction of the Siamese network model.
 
-Constructs the architecture of Siamese network.
+* find_first_frame.py: import video frames and allow user to pick the first patch interactively
 
-* tracker.py
+* video2image: convert video to image frames
 
-The main program that interects with the Siamese network model and video file.
+* utils.py: contains functions used for training and prediction.
 
-* utils.py
+* resize.py: resize images
 
-Contains functions used for training and prediction.
+## Preprocessing training data
+The face of human beings has sophisticated details with which we distinguish one from another. Hence, we pick the face to train out 
+Siamese network model. In this project, the face training data was downloaded from http://vis-www.cs.umass.edu/lfw/ .Individuals who 
+has only 1 photo were used to generate negative pairs; individuals who has 2 or more photos are used to generatepositive pairs. 
+In order to generate training data:
 
-* resize.py
+1. Download data from http://vis-www.cs.umass.edu/lfw/
+2. Decompress and place the "lfw" file to the same directory of face_data_prep.py
+3. Execute face_data_prep.py
 
-Resize images
+#### Code example:
+    $ python face_data_prep.py
 
 ## Training the model
 Execute main.py with following arguments:
@@ -62,16 +69,45 @@ Execute main.py with following arguments:
     
     -val_data: validation data. if given, overwrite split ratio
 
-### Code Example:
+#### Code Example:
     $python main.py -mode 1 -data <path for training data> -ep 5 -bs 2 -lr 0.001 -output l -loss c -split_ratio 0.2
 
-## Running the program
-1. "tracker.py" is the only source file that need to be execute. Before running
-this program, make sure "siamese.py" is placed in the same directory.
-2. The images of frames of video must be extracted beforehand. They should be
-named as "frame#.jpg". For example, frame0.jpg, frame1.jpg, frame2.jpg..., and so on.
-3. Place the frame images in a file, which is also in the directory of source files.
-4. Up till now, the directory should have at least "tracker.py", "siamese.py".Parameters can be assigned via the following arguments.
+## Capturing initial object location
+We focused on the tracking problem. Therefore, the program is semi-automated, which means the user have to assign the
+first location of bounding box of object.
+
+#### Required arguments:
+    -v: path of video to convert
+
+    -f: file to store image frames
+
+1. If -v and -f are assigned, store image frames to -f, and display the first image in -f.
+
+2. If only -v is assigned, create a file named "video_frames", and display the first image in the file.
+
+3. If only -f is assigned, do not convert video to images, and only disply the first image in -f.
+
+#### Optional arguments:
+    -fs: size of image frames. Default = (640,340)
+
+    -bs: size of bounding box. Default = 64
+
+#### Picking the location of bounding box
+
+1. Click on the region of interest, a bounding box centered at the click will be displayed. Also, the command line will print the coordinate of the bounding box.
+
+2. Press c to clear the bounding boxes
+
+3. Press q to quit
+
+#### Code example:
+
+    $ python find_first_patch.py -v video_file -f where_to_store -fs 1080,1240 -bs 100
+
+    $ python find_first_patch.py -f image_file -bs 100
+
+## Object tracking
+After getting the initial position of the object and the pretrained model, execute tracker.py
 
 #### Required arguments:
     -p: video source file. Note that the frame images must be named as 
