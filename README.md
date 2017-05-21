@@ -11,29 +11,19 @@ static images to learn features of different classes. In the tracking phase, ass
 
 ## Contents
 
-* main.py
+* main.py: the program used to call functions on utils. This program is for training Siamese model.
 
-The program used to call functions on utils. This program is for training Siamese model.
+* siamese_network.py: constructs the architecture of Siamese network.
 
-* siamese_network.py
-
-Constructs the architecture of Siamese network.
-
-* tracker.py
-
-The main program that interects with the Siamese network model and video file.
+* tracker.py: takes in image frames and mark object bounding boxes by prediction of the Siamese network model.
 
 * find_first_frame.py: import video frames and allow user to pick the first patch interactively
 
 * video2image: convert video to image frames
 
-* utils.py
+* utils.py: contains functions used for training and prediction.
 
-Contains functions used for training and prediction.
-
-* resize.py
-
-Resize images
+* resize.py: resize images
 
 ## Preprocessing training data
 The face of human beings has sophisticated details with which we distinguish one from another. Hence, we pick the face to train out 
@@ -101,6 +91,20 @@ first location of bounding box of object.
     -fs: size of image frames. Default = (640,340)
 
     -bs: size of bounding box. Default = 64
+
+#### Picking the location of bounding box
+
+1. Click on the region of interest, a bounding box centered at the click will be displayed. Also, the command line will print the coordinate of the bounding box.
+
+2. Press c to clear the bounding boxes
+
+3. Press q to quit
+
+#### Code example:
+
+    $ python find_first_patch.py -v video_file -f where_to_store -fs 1080,1240 -bs 100
+
+    $ python find_first_patch.py -f image_file -bs 100
 
 ## Object tracking
 After getting the initial position of the object and the pretrained model, execute tracker.py
