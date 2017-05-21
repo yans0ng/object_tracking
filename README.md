@@ -23,6 +23,10 @@ Constructs the architecture of Siamese network.
 
 The main program that interects with the Siamese network model and video file.
 
+* find_first_frame.py: import video frames and allow user to pick the first patch interactively
+
+* video2image: convert video to image frames
+
 * utils.py
 
 Contains functions used for training and prediction.
@@ -82,7 +86,21 @@ Execute main.py with following arguments:
 We focused on the tracking problem. Therefore, the program is semi-automated, which means the user have to assign the
 first location of bounding box of object.
 
+#### Required arguments:
+    -v: path of video to convert
 
+    -f: file to store image frames
+
+1. If -v and -f are assigned, store image frames to -f, and display the first image in -f.
+
+2. If only -v is assigned, create a file named "video_frames", and display the first image in the file.
+
+3. If only -f is assigned, do not convert video to images, and only disply the first image in -f.
+
+#### Optional arguments:
+    -fs: size of image frames. Default = (640,340)
+
+    -bs: size of bounding box. Default = 64
 
 ## Object tracking
 After getting the initial position of the object and the pretrained model, execute tracker.py
