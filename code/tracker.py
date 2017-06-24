@@ -4,7 +4,6 @@ import glob
 import argparse
 import os
 from utils import *
-
 THE_SIZE = 256  # size of candidata patch
 """
 The class Bounding Box consists of coordinate information and a
@@ -280,7 +279,6 @@ if __name__ == "__main__":
         #cv2.waitKey(0)
 
         scores = calcOptLoc(t.averaged_target(), t.read_next(), args["weight_path"], args["output_func"])
-        t.write(scores[0], scores[1])
 
         #t.catch_score(scores)
 

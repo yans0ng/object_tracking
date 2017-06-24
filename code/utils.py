@@ -97,7 +97,9 @@ def calcOptLoc(target_patch, candidate_patches, weight_path, output_func):
 	global model
 	global critera
 	global criterium
+	criterium = None
 	if model == None:
+		criterium = criteria[output_func]
 		print "First time importing the module, Initializing model..."
 		criterium = criteria[output_func]
 		print "criterium:", criterium
@@ -110,8 +112,6 @@ def calcOptLoc(target_patch, candidate_patches, weight_path, output_func):
 	if (len(candidate_patches.shape) == 3):
 		candidate_patches = np.expand_dims(candidate_patches, axis = 0)
         scores = model.predict([target_patch, candidate_patches])
-	print "ccc ", criterium
-	print "scores: ", scores
 	loc = criterium(scores)
 	return loc
 	
