@@ -4,7 +4,7 @@ import glob
 import argparse
 import os
 #from utils import *
-THE_SIZE = 128
+THE_SIZE = 256  # size of candidata patch
 """
 The class Bounding Box consists of coordinate information and a
 deep copy of image patch. Instance variable are public so that
@@ -103,7 +103,7 @@ class Tracker:
         #for BB in self.__obj_traj:
         #    average += BB.patch.astype(float) / float(self.__AVG_NUM)
         for img in self.tgts:
-            print img.shape
+            #print img.shape
             average += img.astype(float) / float(len(self.tgts))
         
         self.__avg_patch = average.astype(np.uint8)
@@ -114,6 +114,7 @@ class Tracker:
         self.__current_frame = cv2.imread(self.__filepath+'/'+str(self.__current_index)+'.jpg')
         x_start = self.location[0] - THE_SIZE/2
         y_start = self.location[1] - THE_SIZE/2
+        #print '{}, {}'.format(x_start, y_start)
         output = self.__current_frame[x_start:x_start+THE_SIZE, y_start:y_start+THE_SIZE,:]
         x_diff = THE_SIZE - output.shape[0]
         y_diff = THE_SIZE - output.shape[1]
@@ -135,6 +136,12 @@ class Tracker:
         self.tgts.append(new_obj)
         self.location = (x_start, y_start)
 
+    def out(self, stroke = 3):
+        output = self.__current_frame.copy()
+        pt1 = (self.location[0], self.location[1])
+        pt2 = (pt1[0] + self.width, pt1[1] + self.height)
+        cv2.rectangle(output, pt1, pt2, (255,0,0), 2)
+        return output
     """Sample patches from new frame based on the position of  previous BB"""
     def get_next_patches(self):
         self.__current_index += 1
@@ -247,7 +254,7 @@ if __name__ == "__main__":
     #ap.add_argument("-w", "--weight_path", required = True, helper = 'pretrained weight')    
     ap.add_argument("-x", "--init_x", required=True, help="Initial Object Location(x)",type=int)
     ap.add_argument("-y", "--init_y", required=True, help="Initial Object Location(y)",type=int)
-    ap.add_argument("-s", "--size", required=False, default=64, help="Object Size", type=int)
+    ap.add_argument("-s", "--size", required=False, default=128, help="Object Size", type=int)
     ap.add_argument("-n", "--sample_num", required=False, default=50, help="Number of Samples",type=int)
     ap.add_argument("-v", "--variance", required=False, default=5.,help="Sampling Variance",type=float)
     ap.add_argument("-o", "--output_file", required=False,default='tracker_output', help="Output file")
@@ -261,16 +268,18 @@ if __name__ == "__main__":
     while( t.has_next()):
         count += 1
         #candidate_patches = t.get_next_patches()
-        t.read_next()
-        x1 = np.random.randint(20)
-        y1 = np.random.randint(20)
-        t.write(x1, y1)
-        cv2.imshow('next',t.averaged_target().T)
-        cv2.waitKey(0)
 
-        #scores = calculateScores(t.avg_target(), candidate_patche, args["weight_path"], args["output_func"])
-        # test with arbitary score list
-        #scores = [1, 2, 3, 4, 5]
+        # testing...
+        #cv2.imshow('next', t.read_next())
+        #t.read_next()
+        #x1 = np.random.randint(THE_SIZE)
+        #y1 = np.random.randint(THE_SIZE)
+        #t.write(x1,y1)
+        #cv2.imshow('avg',t.averaged_target().T)
+        #cv2.waitKey(0)
+
+        scores = calculateScores(t.averaged_target(), t.read_next(), args["weight_path"], args["output_func"])
+        t.write(scores[0], scores[1])
 
         #t.catch_score(scores)
 
@@ -279,11 +288,10 @@ if __name__ == "__main__":
         #target = t.averaged_target()
         #cv2.imwrite("target/"+str(count)+".jpg",target)
 
-        #TODO uncomment this section
-        #bounded_frame = t.output()
-        #if(not os.path.isdir(args["output_file"])):
-        #    os.mkdir(args["output_file"])
-        #cv2.imwrite(args["output_file"]+"/"+str(count)+".jpg",bounded_frame)
+        bounded_frame = t.out()
+        if(not os.path.isdir(args["output_file"])):
+            os.mkdir(args["output_file"])
+        cv2.imwrite(args["output_file"]+"/"+str(count)+".jpg",bounded_frame)
 
         #cv2.imwrite("images/"+str(count)+".jpg",bounded_frame)
         #cv2.imshow('frame',bounded_frame)
