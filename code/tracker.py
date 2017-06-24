@@ -4,6 +4,8 @@ import glob
 import argparse
 import os
 from utils import *
+
+THE_SIZE = 256  # size of candidata patch
 """
 The class Bounding Box consists of coordinate information and a
 deep copy of image patch. Instance variable are public so that
@@ -73,7 +75,7 @@ class Tracker:
     def __init__(self,filepath,x0,y0,width,height,avg_num=2,sample_num=50,var=5.):
         self.__filepath = filepath
         self.__num_frames = len(glob.glob(filepath+'/*.jpg'))
-        self.__current_frame = cv2.imread(filepath+'/frame0.jpg')
+        self.__current_frame = cv2.imread(filepath+'/0.jpg')
         self.__current_index = 0
         self.__SAMPLE_NUM = sample_num
         self.__VARIANCE = var
@@ -87,17 +89,60 @@ class Tracker:
         self.__AVG_NUM = avg_num
         self.__target = first_patch.copy()
 
+        #TODO new
+        self.location = (x0, y0)
+        self.width = width
+        self.height = height
+        self.tgts = []
+        self.tgts.append(first_patch)
+
     """Average object patch from the most recent K BB's"""
     def averaged_target(self):
         # average previous patches
-        average = np.ndarray((self.get_width(),self.get_height(),3),dtype=float)
+        average = np.ndarray((self.width,self.height,3),dtype=float)
         average.fill(0.)
-        for BB in self.__obj_traj:
-            average += BB.patch.astype(float) / float(self.__AVG_NUM)
+        #for BB in self.__obj_traj:
+        #    average += BB.patch.astype(float) / float(self.__AVG_NUM)
+        for img in self.tgts:
+            #print img.shape
+            average += img.astype(float) / float(len(self.tgts))
         
         self.__avg_patch = average.astype(np.uint8)
         return self.__avg_patch.T
 
+    def read_next(self):
+        self.__current_index += 1
+        self.__current_frame = cv2.imread(self.__filepath+'/'+str(self.__current_index)+'.jpg')
+        x_start = self.location[0] - THE_SIZE/2
+        y_start = self.location[1] - THE_SIZE/2
+        #print '{}, {}'.format(x_start, y_start)
+        output = self.__current_frame[x_start:x_start+THE_SIZE, y_start:y_start+THE_SIZE,:]
+        x_diff = THE_SIZE - output.shape[0]
+        y_diff = THE_SIZE - output.shape[1]
+        if x_diff > 0 or y_diff > 0:
+            output = cv2.copyMakeBorder(output,0,x_diff,0,y_diff,cv2.BORDER_CONSTANT)
+        return output.T
+
+    def write(self, x, y):
+        x_start = self.location[0] - THE_SIZE/2 + x
+        y_start = self.location[1] - THE_SIZE/2 + y
+        new_obj = self.__current_frame[x_start:x_start+self.width,y_start:y_start+self.height,:]
+        x_diff = self.width - new_obj.shape[0]
+        y_diff = self.height - new_obj.shape[1]
+        if x_diff > 0 or y_diff > 0:
+            new_obj = cv2.copyMakeBorder(new_obj,0,x_diff,0,y_diff,cv2.BORDER_CONSTANT)
+        
+        if len(self.tgts) >= self.__AVG_NUM:
+            self.tgts.pop(0)
+        self.tgts.append(new_obj)
+        self.location = (x_start, y_start)
+
+    def out(self, stroke = 3):
+        output = self.__current_frame.copy()
+        pt1 = (self.location[0], self.location[1])
+        pt2 = (pt1[0] + self.width, pt1[1] + self.height)
+        cv2.rectangle(output, pt1, pt2, (255,0,0), 2)
+        return output
     """Sample patches from new frame based on the position of  previous BB"""
     def get_next_patches(self):
         self.__current_index += 1
@@ -207,14 +252,14 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-p", "--source_file", required=True, help="Video source")
-    ap.add_argument("-w", "--weight_path", required = True, helper = 'pretrained weight')    
+    ap.add_argument("-w", "--weight_path", required = True, help = 'pretrained weight')    
     ap.add_argument("-x", "--init_x", required=True, help="Initial Object Location(x)",type=int)
     ap.add_argument("-y", "--init_y", required=True, help="Initial Object Location(y)",type=int)
-    ap.add_argument("-s", "--size", required=False, default=64, help="Object Size", type=int)
+    ap.add_argument("-s", "--size", required=False, default=128, help="Object Size", type=int)
     ap.add_argument("-n", "--sample_num", required=False, default=50, help="Number of Samples",type=int)
     ap.add_argument("-v", "--variance", required=False, default=5.,help="Sampling Variance",type=float)
     ap.add_argument("-o", "--output_file", required=False,default='tracker_output', help="Output file")
-     ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
+    ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
     args = vars(ap.parse_args())
 
     # instantiate tracker
@@ -223,24 +268,32 @@ if __name__ == "__main__":
     count = 0
     while( t.has_next()):
         count += 1
-        candidate_patches = t.get_next_patches()
+        #candidate_patches = t.get_next_patches()
 
-        scores = calculateScores(t.avg_target(), candidate_patche, args["weight_path"], args["output_func"])
-        # test with arbitary score list)
-        # test with arbitary score list
-        #scores = [1, 2, 3, 4, 5]
+        # testing...
+        #cv2.imshow('next', t.read_next())
+        #t.read_next()
+        #x1 = np.random.randint(THE_SIZE)
+        #y1 = np.random.randint(THE_SIZE)
+        #t.write(x1,y1)
+        #cv2.imshow('avg',t.averaged_target().T)
+        #cv2.waitKey(0)
 
-        t.catch_score(scores)
+        scores = calcOptLoc(t.averaged_target(), t.read_next(), args["weight_path"], args["output_func"])
+        t.write(scores[0], scores[1])
+
+        #t.catch_score(scores)
 
         # if you want to store target as well, create a file called "target"
         # and uncomment the following two lines.
         #target = t.averaged_target()
         #cv2.imwrite("target/"+str(count)+".jpg",target)
 
-        bounded_frame = t.output()
+        bounded_frame = t.out()
         if(not os.path.isdir(args["output_file"])):
             os.mkdir(args["output_file"])
         cv2.imwrite(args["output_file"]+"/"+str(count)+".jpg",bounded_frame)
+
         #cv2.imwrite("images/"+str(count)+".jpg",bounded_frame)
         #cv2.imshow('frame',bounded_frame)
 

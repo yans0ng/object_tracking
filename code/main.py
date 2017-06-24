@@ -4,11 +4,11 @@ from siamese_network import *
 from utils import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-data', required = True, help = 'training data or data to predicted')
-parser.add_argument('-mode', required = True, help = '0 for prediction, otherwise training with data', type = int)
+parser.add_argument('-data', required = True, help = 'training data or data used for prediction')
+parser.add_argument('-mode', required = True, help = 'p for prediction and t for training')
 parser.add_argument('-output', help = 'Output function, e for euclidean distance, c for cosine similarity', default = 'e')
 parser.add_argument('-wpath', '--weight_path', help = 'pretrained weight', default = None)
-parser.add_argument('-split_ratio', '--validation_split_ratio', help = 'ratio of validation data used during training'default = 0.2, type = float)
+parser.add_argument('-split_ratio', '--validation_split_ratio', help = 'ratio of validation data used during training', default = 0.2, type = float)
 parser.add_argument('-ep', '--epoch', help = 'number of epochs', default = 5, type = int)
 parser.add_argument('-bs', '--batch_size', help = 'mini batches', default = 4, type = int)
 parser.add_argument('-wspath', '--weight_save_path', help = 'Path for saving trained weight', default = '{epoch:02d}-{val_loss:.2f}.hdf5')
@@ -24,12 +24,12 @@ data_path = args.data
 batch_size = args.batch_size
 weight_path = args.weight_path
 
-if mode == 0:
+if mode == 'p':
 	pred_save_path = args.prediction_save_path
 	pred = predict(output_func, weight_path, data_path, batch_size)
 	np.savez(pred_save_path, prediction = pred)
 	print "Prediction success"
-else:
+elif mode == 't':
 	weight_save_path = args.weight_save_path
 	log_save_path = args.log_save_path
 	val_split_ratio = args.validation_split_ratio
@@ -38,9 +38,12 @@ else:
 	loss = args.loss_function
 	val_path = args.validation_data
 	train(train_data = data_path, output_func = output_func,
-		  loss_func = loss_func, epochs = epochs,
+		  loss = loss, epochs = epochs,
 		  lr = lr, batch_size = batch_size,
 		  val_data = val_path, weight_path = weight_path,
 		  val_ratio = val_split_ratio, weight_save_path = weight_save_path,
 		  log_save_path = log_save_path)
 	print 'Training Complete'
+
+else:
+    raise Exception('mode should be p or t, but got {}'.format(mode))
