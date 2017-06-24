@@ -214,7 +214,7 @@ if __name__ == "__main__":
     ap.add_argument("-n", "--sample_num", required=False, default=50, help="Number of Samples",type=int)
     ap.add_argument("-v", "--variance", required=False, default=5.,help="Sampling Variance",type=float)
     ap.add_argument("-o", "--output_file", required=False,default='tracker_output', help="Output file")
-     ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
+    ap.add_argument("-e", "--output_func", required = False, default = "e", help = 'function used as network output')
     args = vars(ap.parse_args())
 
     # instantiate tracker
