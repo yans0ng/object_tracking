@@ -3,6 +3,7 @@ from siamese_network import *
 from keras import optimizers
 import numpy as np
 model = None
+criterium = None
 basic_size = 127
 use_resnet = False
 def getOptimizers(lr = 0.001):
@@ -92,18 +93,25 @@ def predict(output_func, weight_path, data_path, batch_size):
 	model.load_weights(weight_path)
 	return model.predict([left, right], batch_size = batch_size)
 
-def calcOptScores(target_patch, candidate_patches, weight_path, output_func):
+def calcOptLoc(target_patch, candidate_patches, weight_path, output_func):
 	global model
 	global critera
-	criterium = None
+	global criterium
 	if model == None:
-		criterium = criteria[output_func]
 		print "First time importing the module, Initializing model..."
-		model = createSiameseNetwork(output_func, mode = 'test')
+		criterium = criteria[output_func]
+		print "criterium:", criterium
+		model = createSiameseNetwork(output_func, basic_size = basic_size, use_resnet = use_resnet, mode = 'test')
 		print "Loading weights from ", weight_path
 		model.load_weights(weight_path)
 		print "Initialization Complete"
-	scores = model.predict([target_patch, candidate_patches])
+	if (len(target_patch.shape) == 3):
+		target_patch = np.expand_dims(target_patch, axis = 0)
+	if (len(candidate_patches.shape) == 3):
+		candidate_patches = np.expand_dims(candidate_patches, axis = 0)
+        scores = model.predict([target_patch, candidate_patches])
+	print "ccc ", criterium
+	print "scores: ", scores
 	loc = criterium(scores)
 	return loc
 	
