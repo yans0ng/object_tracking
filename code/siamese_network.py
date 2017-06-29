@@ -8,13 +8,14 @@ from keras.layers.core import Lambda, Reshape
 from ipykernel import kernelapp as app
 import tensorflow as tf
 # Configuration
-stride = 1
-kernel_size = 3
-num_hw_layers = 4
+KERNEL_SIZE = 3
+NUM_HW_LAYERS = 6 
+NUM_FILTERS = 64
+NUM_CONVS = 2
 def createBasicBlock(input_dim, filters = 32, kernel_size = 3, strides = 1, act_func = 'tanh', num_conv = 1):
 	model = Sequential()
     	for i in range(num_conv):
-		model.add(Conv2D(filters = filters, kernel_size = 3, strides = 1, 
+		model.add(Conv2D(filters = filters, kernel_size = kernel_size, strides = strides, 
         	             	input_shape = input_dim, padding = 'valid', 
                 	     	data_format = 'channels_first'
                    		 )
@@ -27,25 +28,23 @@ def highway_helper(x):
     input_tensor, output_tensor, trans_tensor = x
     return multiply([output_tensor, trans_tensor]) + multiply([input_tensor, 1 - trans_tensor])
 
-def createHighwayBlock(inputs, filters = 32, kernel_size = 3, stride = 1, act_func = 'relu', use_resnet = True):
+def createHighwayBlock(inputs, kernel_size = 3, strides = 1, act_func = 'relu', use_resnet = True):
     input1, input2 = inputs
     input_dim = K.int_shape(input1)[1:]
-    bb = createBasicBlock(input_dim, filters, kernel_size, stride, act_func =  act_func)
+    bb = createBasicBlock(input_dim, NUM_FILTERS, kernel_size = 1, strides = strides, act_func =  act_func, num_conv = NUM_CONVS)
     bb1 = bb(input1)
     bb2 = bb(input2)
-    res = createBasicBlock(input_dim, filters, kernel_size, stride, act_func = act_func)
-    res1 = res(input1)
-    res2 = res(input2)
+    res = createBasicBlock(input_dim, NUM_FILTERS, kernel_size = 1, strides = strides, act_func = act_func, num_conv = NUM_CONVS)
     if use_resnet:
-    	hb1 = add([res1, bb1])
-	hb2 = add([res2, bb2])
+    	hb1 = add([input1, bb1])
+	hb2 = add([input2, bb2])
     else:
-    	trans = createBasicBlock(input_dim, filters, kernel_size, stride, act_func = 'sigmoid')    
+    	trans = createBasicBlock(input_dim, NUM_FILTERS, kernel_size = 1, strides = strides, act_func = 'sigmoid', num_conv = NUM_CONVS)    
     	trans1 = trans(input1)
     	trans2 = trans(input2)
     	hh = Lambda(highway_helper)
-    	hb1 = hh([res1, bb1, trans1])
-    	hb2 = hh([res2, bb2, trans2])
+    	hb1 = hh([input1, bb1, trans1])
+    	hb2 = hh([input2, bb2, trans2])
     return [hb1, hb2]
 
 '''
@@ -165,22 +164,27 @@ def getOutputFunction(output):
         	raise Exception ('output function {0} is not supported, only support e for euclideanDistance and c for cosineSimilarity'.format(output))
 	return outFunc
 
-def createSiameseNetwork(output, filters = 32, basic_size = 128, use_resnet = True, mode = 'train'): 
+def createSiameseNetwork(output, use_resnet = True, mode = 'train'): 
     print "creating siamese network"
-    input1 = Input((3, basic_size, basic_size))
-    input2 = Input((3, None, None))
+    #input1 = Input((3, None, None))
+    #input2 = Input((3, None, None))
+    input1 = Input((3, 127, 127))
+    input2 = Input((3, 127, 127))
     outFunc = getOutputFunction(output)
-    #conv = Conv2D(filters = filters, kernel_size = 3, strides = 1, padding = 'same', data_format = 'channels_first')
-    #hb1 = conv(input1)
-    #hb2 = conv(input2)
-    hb = [input1, input2]
-    #hb = [createHighwayBlock(hb, filters, kernel_size, stride, use_resnet = use_resnet) for i in range(num_hw_layers)]
-    for i in range(num_hw_layers):
-	if i == num_hw_layers - 1:
+    conv = Conv2D(filters = NUM_FILTERS, kernel_size = 1, strides = 1, padding = 'same', data_format = 'channels_first')
+    hb1 = conv(input1)
+    hb2 = conv(input2)
+    hb = [hb1, hb2]
+    for i in range(NUM_HW_LAYERS):
+	if i == NUM_HW_LAYERS - 1:
 		act_func = 'linear'
 	else:
 		act_func = 'relu'
-	hb = createHighwayBlock(hb, filters = filters, kernel_size = kernel_size, stride = stride, act_func = act_func, use_resnet = use_resnet)
+	hb = createHighwayBlock(hb, kernel_size = KERNEL_SIZE, strides = 1, act_func = act_func, use_resnet = use_resnet)
+	bb = createBasicBlock((NUM_FILTERS, None, None), kernel_size = KERNEL_SIZE, filters = NUM_FILTERS, strides = 2, act_func = act_func)
+	hb = [bb(input) for input in hb]
+    print K.int_shape(hb[0])
+    print K.int_shape(hb[1])
     y=Lambda(outFunc, arguments = {'mode' : mode})(hb)
     model = Model([input1, input2], y)
     return model
