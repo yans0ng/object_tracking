@@ -1,51 +1,31 @@
 from keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping
 from siamese_network import *
 from keras import optimizers
-import numpy as np
-model = None
-criterium = None
-basic_size = 127
-use_resnet = False
+
 def getOptimizers(lr = 0.001):
 	return optimizers.RMSprop(lr = lr)
 
 def contrastive_loss(y_true, y_pred):
+    '''Contrastive loss from Hadsell-et-al.'06
+    http://yann.lecun.com/exdb/publis/pdf/hadsell-chopra-lecun-06.pdf
+    '''
     margin = 100
-    return K.mean((1 - y_true) * K.square(y_pred) + y_true * K.square(K.maximum(margin - y_pred, 0)))
+    return K.mean((1-y_true) * K.square(y_pred) + y_true * K.square(K.maximum(margin - y_pred, 0)))
 
 def logit_loss(y_true, y_pred):
 	return K.log(1+K.exp(-y_true*y_pred))
 
-def square_loss(y_true, y_pred):
-	return K.mean(K.square(y_true - y_pred), axis = -1)
-
-def customMetric(y_true, y_pred):
-	return K.mean(K.equal((y_true+1)/2, K.round((y_pred+1)/2)), axis=-1)
-
 def getLossAndMetrics(loss_func):
 	if loss_func == 'c':
 		return contrastive_loss, 'mean_squared_error'
-	elif loss_func == 's':
-		return square_loss, customMetric
 	elif loss_func == 'l':
-		return logit_loss, customMetric
+		return logit_loss, 'binary_accuracy'
 	else:
-		raise Exception('loss function {0} is not supported. We currently only support c for contrastive loss, l for logistic loss and s for square loss'.format(loss_func))
-
-def getEDOptLocation(input):
-	return np.unravel_index(np.argmin(input), input.shape)
-
-def getCSOptLocation(input):
-	return np.unravel_index(np.argmax(input), input.shape)	
-
-criteria = {
-       'e' : getEDOptLocation,
-       'c' : getCSOptLocation
-}
+		raise Exception('loss function {0} is not supported. We currently only support c for contrastive loss and l for logistic loss'.format(loss_func))
 
 def genCallBacks(weight_save_path, log_save_path):
         callback_tb = TensorBoard(log_dir=log_save_path, histogram_freq=0, write_graph=True, write_images=True)
-        callback_mc = ModelCheckpoint(weight_save_path, verbose = 1, save_best_only = True, save_weights_only = True, period = 1)
+        callback_mc = ModelCheckpoint(weight_save_path, verbose = 1, save_best_only = False, save_weights_only = True, period = 1)
         #callback_es = EarlyStopping(min_delta = 0, patience = 1, verbose = 1)
         return [callback_tb, callback_mc]
 
@@ -59,7 +39,7 @@ def readData(path, train = True):
 	return left, right
 
 def train(train_data, output_func = 'e',
-		 loss = 'c', epochs = 5, 
+		 loss_func = 'c', epochs = 5, 
 		 batch_size = 1, lr = 0.001, 
 		 val_data = None, weight_path = None, 
 		 val_ratio = 0.2, weight_save_path = '{epoch:.2d}-{val_loss:.2f}',
@@ -67,13 +47,12 @@ def train(train_data, output_func = 'e',
 		 ):
 	if train_data == None:
 		raise Exception('No training data')
-	model = createSiameseNetwork(output_func, basic_size = basic_size, use_resnet = use_resnet)
+	model = createSiameseNetwork(output_func)
 	callbacks = genCallBacks(weight_save_path, log_save_path)
 	optimizer = getOptimizers(lr)
-	loss_func, metric = getLossAndMetrics(loss)
-	left, right, label = readData(train_data, train = True)
+	loss_func, metric = getLossAndMetrics(loss_func)
+ 	left, right, label = readData(train_data)	
 	if weight_path:
-		print "load weight from {}".format(weight_path)
 		model.load_weights(weight_path)
 	
 	model.compile(optimizer=optimizer, loss=loss_func, metrics = [metric])
@@ -93,25 +72,20 @@ def predict(output_func, weight_path, data_path, batch_size):
 	model.load_weights(weight_path)
 	return model.predict([left, right], batch_size = batch_size)
 
-def calcOptLoc(target_patch, candidate_patches, weight_path, output_func):
+model = None
+
+def calculateScores(target_patch, candidate_patches, weight_path, output_func):
 	global model
-	global critera
-	global criterium
-	criterium = None
 	if model == None:
-		criterium = criteria[output_func]
 		print "First time importing the module, Initializing model..."
-		criterium = criteria[output_func]
-		print "criterium:", criterium
-		model = createSiameseNetwork(output_func, basic_size = basic_size, use_resnet = use_resnet, mode = 'test')
+		model = createSiameseNetwork(output_func)
 		print "Loading weights from ", weight_path
 		model.load_weights(weight_path)
 		print "Initialization Complete"
-	if (len(target_patch.shape) == 3):
-		target_patch = np.expand_dims(target_patch, axis = 0)
-	if (len(candidate_patches.shape) == 3):
-		candidate_patches = np.expand_dims(candidate_patches, axis = 0)
-        scores = model.predict([target_patch, candidate_patches])
-	loc = criterium(scores)
-	return loc
-	
+	scores = list()
+	target = np.expand_dims(target_patch, 0)
+	for candidate in candidate_patches:
+		candidate = np.expand_dims(candidate, 0)
+		score = model.predict([target, candidate])
+		scores.append(score[0,0])
+	return scores
