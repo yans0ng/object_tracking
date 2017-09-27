@@ -1,3 +1,4 @@
+# Object Tracking
 ## Introduction
 This project originiates from the final project of Digital Image Processing at Columbia University (ELEN 4830 Spring 2017). Our object tracking is based on computing the similarity between target image (average of previous bounding boxes) and the sub-images (sampled randoming around previous object location).
 
